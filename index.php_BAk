@@ -1,0 +1,89 @@
+<?php
+	include 'config.php'; 
+	
+	$db = getConnection();
+
+//echo '<pre>'; print_r($_POST); echo '</pre>';
+
+// remove all cookies
+setcookie('cookie1800', '', time()-3600);
+setcookie('cookie1900', '', time()-3600);
+setcookie('cookie1819', '', time()-3600);
+
+// 1819 - Authrizing Officer
+if ($_POST['username'] == 'PFRAO09042019' && $_POST['password'] == 'PFRAO09042019') {
+	
+	setcookie('cookie1819', $_POST['username'].'-'.$_POST['password'], 0);
+	header('Location: viewlist.php');
+}
+// 1800 login - Reporting Officer
+else if ($_POST['username'] == 'PFRO09042019' && $_POST['password'] == 'PFRO09042019') {
+		
+	setcookie('cookie1800', $_POST['username'].'-'.$_POST['password'], 0);
+	header('Location: viewlist.php');
+}
+ 
+// 1900 login
+//else (($_POST['username'] == 'PF09042019' && $_POST['password'] == 'PF09042019') || ($_POST['username'] == 'PF10042019' && $_POST['password'] == 'PF10042019')) {
+else {
+	
+	if (!empty(trim($_POST['username'])) && !empty(trim($_POST['password']))) {
+		$query = "SELECT COUNT(*) FROM APAR1900 WHERE ID = :username AND (:username = :password)";
+		
+		$stmt = $db->prepare($query);
+		
+		$username = htmlspecialchars(strip_tags(trim($_POST['username'])));
+		$password = htmlspecialchars(strip_tags(trim($_POST['password'])));
+		
+		$stmt->bindParam(":username", $username, PDO::PARAM_STR);
+		$stmt->bindParam(":password", $password, PDO::PARAM_STR);
+
+		$stmt->execute();
+		
+		echo $username . ' ' . $password . ' ' .$stmt->rowCount();
+		
+		if ($stmt->rowCount()) {
+			setcookie('cookie1900', $_POST['username'].'-'.$_POST['password'], 0);
+			header('Location: viewlist.php');
+		}
+	}
+	
+}
+
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>APAR</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="card" style="width: 18rem;">
+            <form name="login" method="post">
+                <div class="form-group">
+                    <label for="exampleInputEmail1">User name</label>
+                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        placeholder="Enter username" name="username">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="password">
+                </div>
+                <input type="submit" class="btn btn-primary" name="Submit">
+            </form>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</body>
+
+</html>
